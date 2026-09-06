@@ -222,6 +222,63 @@
     URL.revokeObjectURL(url);
   }
 
+  // Export a selectable-text, ATS-friendly PDF via the browser's print engine.
+  function downloadPdf() {
+    const markdown = $('resumeMarkdown').textContent;
+    if (!markdown.trim()) return;
+    const name = (collectInput().fullName || 'Resume').trim();
+
+    const doc = `<!DOCTYPE html><html><head><meta charset="utf-8">
+      <title>${escapeHtml(name)} — Resume</title>
+      <style>
+        @page { size: Letter; margin: 0.6in; }
+        * { box-sizing: border-box; }
+        body { font: 11pt/1.4 Georgia, "Times New Roman", serif; color: #000; margin: 0; }
+        h1 { font-size: 20pt; margin: 0 0 2pt; }
+        .contact { font-size: 9.5pt; color: #333; margin: 0 0 10pt; }
+        h2 { font-size: 11pt; text-transform: uppercase; letter-spacing: .06em;
+             border-bottom: 1px solid #000; padding-bottom: 2pt; margin: 14pt 0 6pt; }
+        p { margin: 3pt 0; }
+        ul { margin: 4pt 0; padding-left: 18pt; }
+        li { margin: 2pt 0; }
+        strong { font-weight: bold; }
+        @media print { .noprint { display: none; } }
+      </style></head><body>
+      ${resumeToPrintHtml(markdown)}
+      <script>window.onload=function(){window.print();};</` + `script>
+      </body></html>`;
+
+    const w = window.open('', '_blank');
+    if (!w) { alert('Please allow pop-ups to export the PDF, or use "Download .md".'); return; }
+    w.document.open();
+    w.document.write(doc);
+    w.document.close();
+  }
+
+  // Like miniMarkdown, but the top "# Name" line renders as the header block.
+  function resumeToPrintHtml(md) {
+    const lines = md.split('\n');
+    let html = '';
+    let inList = false;
+    let contactDone = false;
+    const closeList = () => { if (inList) { html += '</ul>'; inList = false; } };
+
+    lines.forEach((line, idx) => {
+      if (/^# /.test(line)) { closeList(); html += `<h1>${inline(line.slice(2))}</h1>`; }
+      else if (/^## /.test(line)) { closeList(); html += `<h2>${inline(line.slice(3))}</h2>`; }
+      else if (/^- /.test(line)) { if (!inList) { html += '<ul>'; inList = true; } html += `<li>${inline(line.slice(2))}</li>`; }
+      else if (line.trim() === '') { closeList(); }
+      else {
+        closeList();
+        // The first non-heading line right after the name is the contact row.
+        if (!contactDone && /<h1>/.test(html) && !/<h2>/.test(html)) { html += `<p class="contact">${inline(line)}</p>`; contactDone = true; }
+        else html += `<p>${inline(line)}</p>`;
+      }
+    });
+    closeList();
+    return html;
+  }
+
   function flash(btn, msg) {
     const original = btn.textContent;
     btn.textContent = msg;
@@ -284,5 +341,6 @@
     $('clearBtn').addEventListener('click', clearAll);
     $('copyBtn').addEventListener('click', copyResume);
     $('downloadBtn').addEventListener('click', downloadResume);
+    $('pdfBtn').addEventListener('click', downloadPdf);
   });
 })();

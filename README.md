@@ -93,8 +93,16 @@ vercel.json         # Vercel config
 test/engine.test.js # lightweight assertions for the engine
 ```
 
+## Export
+
+- **Copy markdown** — paste anywhere.
+- **Download .md** — the raw markdown file.
+- **Download PDF** — opens a print-optimized, single-column view and triggers the
+  browser's print-to-PDF. Text stays selectable (ATS-parseable), not rasterized.
+  Allow pop-ups for this button.
+
 ## Roadmap
 
-- PDF/DOCX export.
+- DOCX export.
 - Multiple experience entries and templates.
 - Semantic (embedding-based) keyword matching.
