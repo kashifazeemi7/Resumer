@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resumer — ATS Resume Builder</title>
+  <meta name="description" content="Engineer modern, recruiter-approved, metric-driven resumes optimized for Applicant Tracking Systems." />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <h1 class="logo">Resumer<span>.</span></h1>
+      <p class="tagline">ATS-optimized, metric-driven resumes — built on the Google XYZ standard.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- INPUT FORM -->
+    <section class="card" aria-labelledby="form-heading">
+      <div class="card-head">
+        <h2 id="form-heading">Candidate Inputs</h2>
+        <div class="head-actions">
+          <button type="button" id="sampleBtn" class="btn btn-ghost">Load sample</button>
+          <button type="button" id="clearBtn" class="btn btn-ghost">Clear</button>
+        </div>
+      </div>
+
+      <form id="resumeForm" onsubmit="return false;">
+        <fieldset>
+          <legend>Contact</legend>
+          <div class="grid">
+            <label>Full name<input id="fullName" type="text" placeholder="Jordan Rivera" /></label>
+            <label>Email<input id="email" type="email" placeholder="you@email.com" /></label>
+            <label>Phone<input id="phone" type="text" placeholder="(555) 012-3456" /></label>
+            <label>Location<input id="location" type="text" placeholder="City, State" /></label>
+            <label>LinkedIn<input id="linkedin" type="text" placeholder="linkedin.com/in/you" /></label>
+            <label>Portfolio / GitHub<input id="portfolio" type="text" placeholder="github.com/you" /></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Target</legend>
+          <div class="grid">
+            <label>Candidate level
+              <select id="level">
+                <option value="">Select…</option>
+                <option>Entry-Level</option>
+                <option>Mid-Career</option>
+                <option>Senior/Executive</option>
+                <option>Career Switcher</option>
+              </select>
+            </label>
+            <label>Target job title<input id="targetTitle" type="text" placeholder="Senior Product Manager" /></label>
+            <label>Target industry<input id="industry" type="text" placeholder="SaaS, FinTech, Healthcare…" /></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Current / Most Recent Role</legend>
+          <div class="grid">
+            <label>Role title<input id="roleTitle" type="text" placeholder="Product Manager" /></label>
+            <label>Company<input id="company" type="text" placeholder="CloudFlow Inc." /></label>
+            <label>Dates<input id="dates" type="text" placeholder="2021 – Present" /></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Experience &amp; Skills</legend>
+          <label class="full">Raw experience &amp; accomplishments <span class="hint">one bullet per line — paste unfiltered</span>
+            <textarea id="rawExperience" rows="7" placeholder="Responsible for the product roadmap&#10;Increased activation by 22% through onboarding redesign&#10;Led a cross-functional team of 8…"></textarea>
+          </label>
+          <label class="full">Hard &amp; soft skills, tools, certifications <span class="hint">comma-separated</span>
+            <textarea id="skills" rows="3" placeholder="SQL, Figma, A/B Testing, Roadmapping, Stakeholder Management, CSPO…"></textarea>
+          </label>
+          <label class="full">Key projects <span class="hint">optional — one per line</span>
+            <textarea id="projects" rows="3" placeholder="Rebuilt onboarding, cutting time-to-value from 14 days to 3…"></textarea>
+          </label>
+          <label class="full">Education &amp; certifications <span class="hint">one per line</span>
+            <textarea id="education" rows="3" placeholder="B.S. Business Administration, UT Austin, 2016&#10;Certified Scrum Product Owner (CSPO)"></textarea>
+          </label>
+          <label class="full">Professional summary <span class="hint">optional — leave blank to auto-generate</span>
+            <textarea id="summary" rows="3" placeholder="Leave blank and the engine will craft a 3-sentence positioning hook."></textarea>
+          </label>
+          <label class="full">Target job description <span class="hint">optional — enables real-time keyword matching</span>
+            <textarea id="jobDescription" rows="5" placeholder="Paste the job posting here for ATS keyword matching…"></textarea>
+          </label>
+        </fieldset>
+
+        <div class="build-row">
+          <button type="button" id="buildBtn" class="btn btn-primary">⚡ Build my resume</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- OUTPUT -->
+    <section id="output" hidden>
+      <!-- Module 1 -->
+      <div class="card">
+        <div class="card-head"><h2>1 · ATS &amp; Match Score Diagnostic</h2></div>
+        <div id="diagnostic"></div>
+      </div>
+
+      <!-- Module 2 -->
+      <div class="card">
+        <div class="card-head">
+          <h2>2 · Complete Modern Resume</h2>
+          <div class="head-actions">
+            <button type="button" id="copyBtn" class="btn btn-ghost">Copy markdown</button>
+            <button type="button" id="downloadBtn" class="btn btn-ghost">Download .md</button>
+          </div>
+        </div>
+        <div class="resume-cols">
+          <div class="resume-preview" id="resumePreview" aria-label="Formatted preview"></div>
+          <pre class="resume-source" id="resumeMarkdown" aria-label="Copy-paste markdown source"></pre>
+        </div>
+      </div>
+
+      <!-- Module 3 -->
+      <div class="card">
+        <div class="card-head"><h2>3 · Resume Optimization Audit</h2></div>
+        <div id="audit"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>Runs entirely in your browser — no data is uploaded. Standard headers, single-column, parser-safe output.</p>
+    </div>
+  </footer>
+
+  <script src="js/engine.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
