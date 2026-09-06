@@ -162,7 +162,12 @@
     }
 
     const result = window.ResumerEngine.runEngine(input, ai);
-    renderMode(result.aiApplied, aiError);
+    renderMode(result.aiApplied, aiError, ai && ai.model);
+    if (!result.aiApplied) {
+      toast(aiError
+        ? `AI unavailable (${aiError}) — using rule-based engine.`
+        : 'AI backend not configured — using rule-based engine.');
+    }
     renderDiagnostic(result.diagnostic);
     renderResume(result.resume);
     renderAudit(result.audit);
@@ -191,16 +196,31 @@
     return res.json();
   }
 
-  function renderMode(aiApplied, aiError) {
+  function renderMode(aiApplied, aiError, model) {
     const el = $('modeBadge');
     if (!el) return;
     if (aiApplied) {
       el.className = 'mode-badge mode-ai';
-      el.textContent = '✨ AI-enhanced (Claude)';
+      el.textContent = model ? `✨ AI-enhanced · ${model}` : '✨ AI-enhanced (Claude)';
     } else {
       el.className = 'mode-badge mode-rule';
-      el.textContent = aiError ? `Rule-based engine · ${aiError}` : 'Rule-based engine (AI backend not configured)';
+      el.textContent = 'Rule-based engine (no AI)';
     }
+  }
+
+  // Transient bottom-of-screen notice.
+  function toast(msg) {
+    let el = $('toast');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'toast';
+      el.className = 'toast';
+      document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('show'), 5000);
   }
 
   function copyResume() {

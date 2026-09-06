@@ -94,6 +94,15 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--brand); out
 .mode-ai { background: linear-gradient(135deg, #7c3aed, #2563eb); color: #fff; }
 .mode-rule { background: var(--line); color: var(--muted); }
 
+/* Toast */
+.toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(16px);
+  background: #1f2937; color: #fff; padding: 11px 18px; border-radius: 10px;
+  font-size: 13px; font-weight: 600; box-shadow: 0 6px 20px rgba(0,0,0,.25);
+  opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; z-index: 50; max-width: 90vw;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
 /* Diagnostic */
 .score-wrap { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; margin-bottom: 18px; }
 .score-ring {
