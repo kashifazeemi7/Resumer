@@ -1,0 +1,14 @@
+{
+  "name": "resumer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ATS-optimized, AI-powered resume builder",
+  "scripts": {
+    "test": "node test/engine.test.js",
+    "dev": "vercel dev",
+    "start": "python3 -m http.server 8000"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

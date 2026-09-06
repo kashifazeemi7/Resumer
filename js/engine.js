@@ -320,7 +320,8 @@ function categorizeSkills(skillsText) {
 /* Resume generation (markdown)                                              */
 /* -------------------------------------------------------------------------- */
 
-function buildSummary(input, keywordMatch) {
+function buildSummary(input, keywordMatch, ai) {
+  if (ai && ai.summary && ai.summary.trim()) return ai.summary.trim();
   if (input.summary && input.summary.trim()) return input.summary.trim();
 
   const level = input.level || 'experienced';
@@ -338,8 +339,9 @@ function buildSummary(input, keywordMatch) {
   ].join(' ');
 }
 
-function generateResume(input, analysis) {
+function generateResume(input, analysis, ai) {
   const { bulletAnalysis, keywordMatch, skills } = analysis;
+  const aiBullets = ai && Array.isArray(ai.bullets) ? ai.bullets : null;
   const lines = [];
 
   // Header — plain text, no icons, no columns.
@@ -351,7 +353,7 @@ function generateResume(input, analysis) {
 
   // Professional Summary
   lines.push('## Professional Summary');
-  lines.push(buildSummary(input, keywordMatch));
+  lines.push(buildSummary(input, keywordMatch, ai));
   lines.push('');
 
   // Core Competencies
@@ -372,9 +374,11 @@ function generateResume(input, analysis) {
   }
   const bullets = bulletAnalysis.length ? bulletAnalysis : [];
   if (bullets.length) {
-    bullets.forEach((b) => {
-      // Use the upgraded bullet where the original was weak, otherwise keep it.
-      const text = b.grade === 'weak' ? b.suggestion : capitalize(b.original);
+    bullets.forEach((b, i) => {
+      // Prefer an AI rewrite; else upgrade weak bullets with the rule engine.
+      let text;
+      if (aiBullets && aiBullets[i] && aiBullets[i].rewritten) text = aiBullets[i].rewritten;
+      else text = b.grade === 'weak' ? b.suggestion : capitalize(b.original);
       lines.push(`- ${text}`);
     });
   } else {
@@ -407,11 +411,16 @@ function capitalize(s) {
 /* Audit                                                                      */
 /* -------------------------------------------------------------------------- */
 
-function buildAudit(bulletAnalysis, input) {
+function buildAudit(bulletAnalysis, input, ai) {
+  const aiBullets = ai && Array.isArray(ai.bullets) ? ai.bullets : null;
   const transformations = bulletAnalysis
-    .filter((b) => b.grade !== 'strong')
+    .map((b, i) => ({ b, i }))
+    .filter(({ b }) => b.grade !== 'strong')
     .slice(0, 5)
-    .map((b) => ({ before: b.original, after: b.suggestion }));
+    .map(({ b, i }) => ({
+      before: b.original,
+      after: aiBullets && aiBullets[i] ? aiBullets[i].rewritten : b.suggestion,
+    }));
 
   const recommendations = [];
   if (!input.portfolio && !input.linkedin) recommendations.push('Add a LinkedIn URL and, if relevant, a portfolio or GitHub link.');
@@ -432,7 +441,7 @@ function buildAudit(bulletAnalysis, input) {
 /* Public entry point                                                         */
 /* -------------------------------------------------------------------------- */
 
-function runEngine(input) {
+function runEngine(input, ai) {
   const corpus = getCorpus(input);
   const bulletAnalysis = analyzeBullets(input.rawExperience);
   const keywordMatch = matchKeywords(corpus, input.jobDescription);
@@ -442,10 +451,11 @@ function runEngine(input) {
   const readability = readabilityGrade(bulletAnalysis);
   const analysis = { bulletAnalysis, keywordMatch, skills };
 
-  const resume = generateResume(input, analysis);
-  const audit = buildAudit(bulletAnalysis, input);
+  const resume = generateResume(input, analysis, ai);
+  const audit = buildAudit(bulletAnalysis, input, ai);
 
   return {
+    aiApplied: !!(ai && (ai.summary || (ai.bullets && ai.bullets.length))),
     diagnostic: {
       score: ats.score,
       signals: ats.signals,

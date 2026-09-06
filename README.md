@@ -1,9 +1,18 @@
 # Resumer — ATS Resume Builder
 
-An AI-informed, **dependency-free web app** that turns raw candidate inputs into a modern,
-recruiter-approved, metric-driven resume optimized for Applicant Tracking Systems (ATS).
+A **web app** that turns raw candidate inputs into a modern, recruiter-approved,
+metric-driven resume optimized for Applicant Tracking Systems (ATS).
 
-Everything runs in the browser — **no candidate data ever leaves the page**.
+It works in two modes:
+
+- **AI-enhanced** — when an `ANTHROPIC_API_KEY` is configured, a Vercel serverless
+  function calls the **Claude API** to rewrite bullets into natural XYZ-standard
+  achievements and craft the professional summary. The key stays server-side.
+- **Rule-based** — with no key configured, a deterministic in-browser engine handles
+  scoring, keyword matching, and heuristic bullet rewriting. The app falls back to this
+  automatically, so it always works, even opened as a local file.
+
+The active mode is shown as a badge on the diagnostic panel.
 
 ## What it does
 
@@ -38,21 +47,38 @@ output modules of the resume-building engine:
 
 See [`js/engine.js`](js/engine.js) — the engine is pure and framework-free.
 
-## Run it
+## Run it locally
 
-No build step. Open `index.html` directly, or serve the folder:
+**Rule-based only (no key), zero setup:**
 
 ```bash
-python3 -m http.server 8000
-# then open http://localhost:8000
+python3 -m http.server 8000    # then open http://localhost:8000
+```
+
+**With the AI backend** (runs the serverless function locally):
+
+```bash
+npm i -g vercel
+cp .env.example .env.local     # add your ANTHROPIC_API_KEY
+vercel dev                     # serves the site + /api/enhance
 ```
 
 Click **Load sample** to see a full end-to-end example.
 
+## Deploy to Vercel
+
+1. Push this repo to GitHub (already done if you're reading this on `main`).
+2. In Vercel: **Add New → Project → Import** this repo. It's detected as a static
+   site with serverless functions in `api/` — no build command needed.
+3. Add an environment variable **`ANTHROPIC_API_KEY`** (Project → Settings →
+   Environment Variables) to enable AI mode. Without it, the app deploys fine and
+   runs in rule-based mode.
+4. Deploy. Or from the CLI: `vercel` (preview) / `vercel --prod`.
+
 ## Test the engine
 
 ```bash
-node test/engine.test.js
+npm test        # node test/engine.test.js
 ```
 
 ## Project structure
@@ -61,12 +87,14 @@ node test/engine.test.js
 index.html          # UI
 css/styles.css      # styles (light/dark aware, print-friendly)
 js/engine.js        # pure ATS engine (scoring, keywords, generation, audit)
-js/app.js           # UI controller (form ↔ engine, copy/download, localStorage)
+js/app.js           # UI controller (form ↔ engine + AI backend, copy/download)
+api/enhance.js      # Vercel serverless function — calls the Claude API
+vercel.json         # Vercel config
 test/engine.test.js # lightweight assertions for the engine
 ```
 
 ## Roadmap
 
-- Optional LLM backend for richer summary/bullet rewriting.
 - PDF/DOCX export.
 - Multiple experience entries and templates.
+- Semantic (embedding-based) keyword matching.

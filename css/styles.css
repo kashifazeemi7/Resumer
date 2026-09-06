@@ -89,6 +89,11 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--brand); out
 .btn-ghost { background: transparent; font-size: 13px; padding: 7px 12px; }
 .build-row { text-align: center; margin-top: 8px; }
 
+/* Mode badge */
+.mode-badge { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
+.mode-ai { background: linear-gradient(135deg, #7c3aed, #2563eb); color: #fff; }
+.mode-rule { background: var(--line); color: var(--muted); }
+
 /* Diagnostic */
 .score-wrap { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; margin-bottom: 18px; }
 .score-ring {

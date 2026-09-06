@@ -143,15 +143,64 @@
   /* Actions                                                                */
   /* ---------------------------------------------------------------------- */
 
-  function build() {
+  async function build() {
     const input = collectInput();
     saveInput(input);
-    const result = window.ResumerEngine.runEngine(input);
+
+    const btn = $('buildBtn');
+    const label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '⏳ Building…';
+
+    // Try the AI backend; fall back to the local rule engine if unavailable.
+    let ai = null;
+    let aiError = null;
+    try {
+      ai = await enhanceWithAI(input);
+    } catch (e) {
+      aiError = e.message || 'AI backend unavailable';
+    }
+
+    const result = window.ResumerEngine.runEngine(input, ai);
+    renderMode(result.aiApplied, aiError);
     renderDiagnostic(result.diagnostic);
     renderResume(result.resume);
     renderAudit(result.audit);
+
+    btn.disabled = false;
+    btn.textContent = label;
     $('output').hidden = false;
     $('output').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  async function enhanceWithAI(input) {
+    const bullets = (input.rawExperience || '')
+      .split(/\r?\n/).map((l) => l.replace(/^[\s•\-*]+/, '').trim()).filter(Boolean);
+
+    const res = await fetch('/api/enhance', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        level: input.level, targetTitle: input.targetTitle, industry: input.industry,
+        skills: input.skills, summary: input.summary, bullets,
+      }),
+    });
+
+    if (res.status === 501) return null; // backend not configured — use rule engine silently
+    if (!res.ok) throw new Error(`AI backend returned ${res.status}`);
+    return res.json();
+  }
+
+  function renderMode(aiApplied, aiError) {
+    const el = $('modeBadge');
+    if (!el) return;
+    if (aiApplied) {
+      el.className = 'mode-badge mode-ai';
+      el.textContent = '✨ AI-enhanced (Claude)';
+    } else {
+      el.className = 'mode-badge mode-rule';
+      el.textContent = aiError ? `Rule-based engine · ${aiError}` : 'Rule-based engine (AI backend not configured)';
+    }
   }
 
   function copyResume() {
